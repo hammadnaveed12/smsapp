@@ -12,11 +12,37 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 
-const {SendSmsModule, IncomingCallModule} = NativeModules;
+const {SendSmsModule, IncomingCallModule, SimInfo} = NativeModules;
 
 export default function App() {
   const [loading, setLoading] = useState(false);
   const [incomingNumber, setIncomingNumber] = useState('');
+
+  const getSimDetails = async () => {
+    try {
+      const result = await SimInfo.getSimDetails();
+      return JSON.parse(result);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const [simDetails, setSimDetails] = useState([]);
+
+  const fetchSimDetails = async () => {
+    try {
+      const details = await getSimDetails();
+      console.log('SIM Details fetched:', details); // Log fetched details
+
+      setSimDetails(details);
+    } catch (error) {
+      console.error('Error fetching SIM details:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSimDetails();
+  }, []);
 
   useEffect(() => {
     requestPermissions()
@@ -53,12 +79,14 @@ export default function App() {
           PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
           PermissionsAndroid.PERMISSIONS.SEND_SMS,
           PermissionsAndroid.PERMISSIONS.READ_CALL_LOG,
+          PermissionsAndroid.PERMISSIONS.READ_PHONE_NUMBERS,
         ]);
 
         return (
           granted[PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE] &&
           granted[PermissionsAndroid.PERMISSIONS.SEND_SMS] &&
-          granted[PermissionsAndroid.PERMISSIONS.READ_CALL_LOG] ===
+          granted[PermissionsAndroid.PERMISSIONS.READ_CALL_LOG] &&
+          granted[PermissionsAndroid.PERMISSIONS.READ_PHONE_NUMBERS] ===
             PermissionsAndroid.RESULTS.GRANTED
         );
       } catch (err) {
@@ -94,6 +122,19 @@ export default function App() {
       <Text style={{marginTop: 20}}>
         Incoming Call Number: {incomingNumber || 'No call detected yet'}
       </Text>
+
+      <View>
+        <Button title="Refresh" onPress={fetchSimDetails} />
+        <Text>SIM Details:</Text>
+        {simDetails.map((sim: any, index) => (
+          <View key={index}>
+            <Text>Carrier: {sim.carrierName}</Text>
+            <Text>Phone Number: {sim.phoneNumber}</Text>
+            <Text>SIM Slot: {sim.simSlotIndex}</Text>
+          </View>
+        ))}
+        <Button title="Refresh" onPress={fetchSimDetails} />
+      </View>
     </View>
   );
 }
