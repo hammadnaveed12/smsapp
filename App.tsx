@@ -79,14 +79,12 @@ export default function App() {
           PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
           PermissionsAndroid.PERMISSIONS.SEND_SMS,
           PermissionsAndroid.PERMISSIONS.READ_CALL_LOG,
-          PermissionsAndroid.PERMISSIONS.READ_PHONE_NUMBERS,
         ]);
 
         return (
           granted[PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE] &&
           granted[PermissionsAndroid.PERMISSIONS.SEND_SMS] &&
-          granted[PermissionsAndroid.PERMISSIONS.READ_CALL_LOG] &&
-          granted[PermissionsAndroid.PERMISSIONS.READ_PHONE_NUMBERS] ===
+          granted[PermissionsAndroid.PERMISSIONS.READ_CALL_LOG] ===
             PermissionsAndroid.RESULTS.GRANTED
         );
       } catch (err) {
